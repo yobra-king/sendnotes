@@ -1,23 +1,44 @@
-FROM richarvey/nginx-php-fpm:1.7.2
+# Use the official PHP image with FPM
+FROM php:8.1-fpm
 
-# Set the working directory
-WORKDIR /var/www/html
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    unzip \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev \
+    nginx \
+    && docker-php-ext-install \
+    pdo_mysql \
+    mbstring \
+    gd \
+    zip \
+    xml
 
-# Copy application files
+# Install Composer globally
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Set working directory
+WORKDIR /var/www
+
+# Copy Laravel files to the container
 COPY . .
 
-# Install Composer dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Install Laravel dependencies
+RUN composer install --optimize-autoloader --no-dev
 
-# Set permissions for storage and bootstrap/cache
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# Set permissions for storage and cache
+RUN chown -R www-data:www-data /var/www \
+    && chmod -R 755 /var/www/storage
 
-# Set environment variables
-ENV APP_ENV production
-ENV APP_DEBUG false
-ENV LOG_CHANNEL stderr
-ENV WEBROOT /var/www/html/public
+# Copy Nginx configuration
+COPY ./nginx/laravel.conf /etc/nginx/sites-available/default
 
-# Run startup script
-CMD ["/bin/bash", "-c", "/usr/local/bin/render-build.sh && /start.sh"]
+# Expose port 80
+EXPOSE 80
+
+# Start services using a custom bash script
+CMD ["./start-container.sh"]
