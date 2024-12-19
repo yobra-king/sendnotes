@@ -1,36 +1,15 @@
-# Base image for PHP
-FROM php:8.2-fpm
-
-# Install system dependencies and extensions
-RUN apt-get update && apt-get install -y \
-    nginx \
-    curl \
-    git \
-    unzip \
-    libpq-dev \
-    libzip-dev \
-    && docker-php-ext-install pdo pdo_pgsql zip
-
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-# Set working directory
-WORKDIR /var/www/html
-
-# Copy Laravel files
+FROM richarvey/nginx-php-fpm:1.7.2
 COPY . .
-
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
-
-# Permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
-# Copy Nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# Expose ports
-EXPOSE 80
-
-# Start Nginx and PHP-FPM
-CMD service nginx start && php-fpm
+# Image config
+ENV SKIP_COMPOSER 1
+ENV WEBROOT /var/www/html/public
+ENV PHP_ERRORS_STDERR 1
+ENV RUN_SCRIPTS 1
+ENV REAL_IP_HEADER 1
+# Laravel config
+ENV APP_ENV production
+ENV APP_DEBUG false
+ENV LOG_CHANNEL stderr
+# Allow composer to run as root
+ENV COMPOSER_ALLOW_SUPERUSER 1
+CMD ["/start.sh"]
