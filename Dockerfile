@@ -1,6 +1,10 @@
+# Use the official PHP 8.3 image with FPM
 FROM php:8.3-fpm
 
-# Install system dependencies
+# Set environment variables to prevent interactive prompts during installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     git \
@@ -10,6 +14,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxml2-dev \
     libzip-dev \
     libcurl4-openssl-dev \
+    libpq-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
     pdo_mysql \
     pdo_pgsql \
@@ -25,31 +33,29 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     hash \
     session \
     openssl \
-    #&& apt-get clean \
-    #&& rm -rf /var/lib/apt/lists/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && composer --version
 
-# Set working directory
+# Set the working directory
 WORKDIR /var/www
 
 # Copy project files
 COPY . .
 
-# Check contents of the directory
-RUN ls -al /var/www
-
 # Install Laravel dependencies
 RUN composer install --optimize-autoloader --no-dev
 
-# Set permissions
+# Set permissions for Laravel directories
 RUN chown -R www-data:www-data /var/www \
-    && chmod -R 755 /var/www/storage
+    && chmod -R 755 /var/www/storage \
+    && chmod -R 755 /var/www/bootstrap/cache
 
 # Expose port 80
 EXPOSE 80
 
-# Run PHP-FPM
+# Start PHP-FPM (default CMD)
 CMD ["php-fpm"]
