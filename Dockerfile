@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
+    libcurl4-openssl-dev \  # Install the latest libcurl
     libpq-dev \
     nginx \
     && docker-php-ext-install \
