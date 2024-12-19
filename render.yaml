@@ -21,3 +21,9 @@ services:
         value: pgsql
       - key: APP_URL
         value: https://sendnotes-kb17.onrender.com
+  - type: web
+    name: my-app
+    env: php
+    buildCommand: |
+      apt-get update && apt-get install -y php8.2-cli
+      composer install --optimize-autoloader --no-dev
