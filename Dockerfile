@@ -1,22 +1,15 @@
-# Use the official PHP image with FPM
 FROM php:8.3-fpm
 
-# Install system dependencies and required libraries
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     git \
     unzip \
-    autoconf \
-    build-essential \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
     libcurl4-openssl-dev \
-    libpq-dev \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
     pdo_mysql \
     pdo_pgsql \
@@ -32,33 +25,31 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     hash \
     session \
     openssl \
-#    && apt-get clean \
- #   && rm -rf /var/lib/apt/lists/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Composer globally
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    && composer --version
 
-# Set the working directory
+# Set working directory
 WORKDIR /var/www
 
-# Copy Laravel files into the container
+# Copy project files
 COPY . .
+
+# Check contents of the directory
+RUN ls -al /var/www
 
 # Install Laravel dependencies
 RUN composer install --optimize-autoloader --no-dev
 
-# Set permissions for storage and cache directories
+# Set permissions
 RUN chown -R www-data:www-data /var/www \
-    && chmod -R 755 /var/www/storage \
-    && chmod -R 755 /var/www/bootstrap/cache
-
-# Configure environment variables for Render
-ENV RENDER=true
-ENV APP_ENV=production
-ENV APP_DEBUG=false
+    && chmod -R 755 /var/www/storage
 
 # Expose port 80
 EXPOSE 80
 
-# Run PHP-FPM by default
+# Run PHP-FPM
 CMD ["php-fpm"]
