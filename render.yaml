@@ -25,5 +25,5 @@ services:
     name: my-app
     env: php
     buildCommand: |
-      apt-get update && apt-get install -y php8.2-cli
+      apt-get update && apt-get install -y php8.3-cli
       composer install --optimize-autoloader --no-dev
