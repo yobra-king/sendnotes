@@ -1,18 +1,23 @@
 # Use the official PHP image with FPM
 FROM php:8.3-fpm
 
-# Install system dependencies
+# Install system dependencies and required libraries
 RUN apt-get update && apt-get install -y \
     curl \
     git \
     unzip \
+    autoconf \
+    build-essential \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
     libcurl4-openssl-dev \
     libpq-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
     nginx \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
     pdo_mysql \
     mbstring \
@@ -20,7 +25,6 @@ RUN apt-get update && apt-get install -y \
     zip \
     xml \
     ctype \
-    curl \
     dom \
     fileinfo \
     filter \
@@ -30,7 +34,8 @@ RUN apt-get update && apt-get install -y \
     pdo \
     session \
     tokenizer \
-    && docker-php-ext-install pdo_pgsql
+    pdo_pgsql \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
