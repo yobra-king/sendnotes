@@ -14,14 +14,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        if (env('APP_ENV') !== 'local') {
-               URL::forceScheme('https');
-           }
-    }
+   }
 
     /**
      * Bootstrap any application services.
      */
     public function boot(UrlGenerator $url)
     {
+
+        if (env('APP_ENV') !== 'local') {
+               URL::forceScheme('https');
+           }
+
 } }
