@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
-    libcurl4-openssl-dev \  # Install the latest libcurl
+    libcurl4-openssl-dev \
     libpq-dev \
     nginx \
     && docker-php-ext-install \
@@ -29,11 +29,7 @@ RUN apt-get update && apt-get install -y \
     pcre \
     pdo \
     session \
-    tokenizer
-
-# Install PHP PostgreSQL extensions
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
+    tokenizer \
     && docker-php-ext-install pdo_pgsql
 
 # Install Composer globally
